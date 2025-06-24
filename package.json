@@ -1,0 +1,45 @@
+{
+  "name": "yt-feed-carousel",
+  "version": "1.0.0",
+  "description": "A responsive YouTube playlist carousel widget with lightbox video player",
+  "main": "dist/yt-feed-carousel.min.js",
+  "style": "dist/yt-feed-carousel.min.css",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "dev": "live-server demo/",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lyndoncortez/yt-feed-carousel.git"
+  },
+  "keywords": [
+    "youtube",
+    "carousel",
+    "playlist",
+    "video",
+    "widget",
+    "responsive",
+    "lightbox",
+    "javascript",
+    "css"
+  ],
+  "author": "Lyndon Joy Cortez <lyndonjoycortez@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/yt-feed-carousel/issues"
+  },
+  "homepage": "https://github.com/yourusername/yt-feed-carousel#readme",
+  "devDependencies": {
+    "uglify-js": "^3.17.4",
+    "clean-css": "^5.3.2"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "jsdelivr": "dist/yt-feed-carousel.min.js",
+  "unpkg": "dist/yt-feed-carousel.min.js"
+}
