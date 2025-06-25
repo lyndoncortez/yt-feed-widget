@@ -1,0 +1,95 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 🔧 Install dependencies
+        run: npm ci
+
+      - name: 🚀 Build project
+        run: npm run build
+
+      - name: 📊 Check build output
+        run: |
+          echo "📁 Built files:"
+          ls -la dist/
+
+      - name: 💾 Commit built files
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add dist/
+          git diff --staged --quiet || git commit -m "🤖 Auto-build: Update minified files [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'release:')
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: 🔖 Extract version from package.json
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: 🚀 Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## 🎉 YT Feed Widget v${{ steps.version.outputs.version }}
+            
+            ### 📦 CDN Links
+            ```html
+            <!-- Carousel only -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lyndoncortez/yt-feed-widget@v${{ steps.version.outputs.version }}/dist/yt-feed-carousel.min.css">
+            <script src="https://cdn.jsdelivr.net/gh/lyndoncortez/yt-feed-widget@v${{ steps.version.outputs.version }}/dist/yt-feed-carousel.min.js"></script>
+            
+            <!-- Grid only -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lyndoncortez/yt-feed-widget@v${{ steps.version.outputs.version }}/dist/yt-feed-grid.min.css">
+            <script src="https://cdn.jsdelivr.net/gh/lyndoncortez/yt-feed-widget@v${{ steps.version.outputs.version }}/dist/yt-feed-grid.min.js"></script>
+            
+            <!-- Both layouts -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lyndoncortez/yt-feed-widget@v${{ steps.version.outputs.version }}/dist/yt-feed-all.min.css">
+            <script src="https://cdn.jsdelivr.net/gh/lyndoncortez/yt-feed-widget@v${{ steps.version.outputs.version }}/dist/yt-feed-all.min.js"></script>
+            ```
+            
+            ### 🔗 Links
+            - [📚 Documentation](https://github.com/lyndoncortez/yt-feed-widget#readme)
+            - [🎮 Carousel Demo](https://lyndoncortez.github.io/yt-feed-widget/demo/)
+            - [📊 Grid Demo](https://lyndoncortez.github.io/yt-feed-widget/demo/grid.html)
+          draft: false
+          prerelease: false

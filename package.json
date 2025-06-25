@@ -1,45 +1,54 @@
 {
-  "name": "yt-feed-carousel",
-  "version": "1.0.0",
-  "description": "A responsive YouTube playlist carousel widget with lightbox video player",
+  "name": "yt-feed-widget",
+  "version": "1.1.0",
+  "description": "YouTube feed tool for CRO and A/B testing",
   "main": "dist/yt-feed-carousel.min.js",
   "style": "dist/yt-feed-carousel.min.css",
+  "files": [
+    "dist/",
+    "src/",
+    "demo/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "node scripts/build.js",
+    "build:js": "uglifyjs src/yt-feed-carousel.js -o dist/yt-feed-carousel.min.js -c -m && uglifyjs src/yt-feed-grid.js -o dist/yt-feed-grid.min.js -c -m",
+    "build:css": "cleancss src/yt-feed-carousel.css -o dist/yt-feed-carousel.min.css && cleancss src/yt-feed-grid.css -o dist/yt-feed-grid.min.css",
     "dev": "live-server demo/",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No tests yet\" && exit 0",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lyndoncortez/yt-feed-carousel.git"
+    "url": "git+https://github.com/lyndoncortez/yt-feed-widget.git"
   },
   "keywords": [
     "youtube",
     "carousel",
+    "grid",
     "playlist",
     "video",
     "widget",
     "responsive",
     "lightbox",
     "javascript",
-    "css"
+    "css",
+    "cro",
+    "ab-testing",
+    "conversion-optimization",
+    "no-code"
   ],
-  "author": "Lyndon Joy Cortez <lyndonjoycortez@gmail.com>",
+  "author": "Lyndon Cortez <your.email@example.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yourusername/yt-feed-carousel/issues"
+    "url": "https://github.com/lyndoncortez/yt-feed-widget/issues"
   },
-  "homepage": "https://github.com/yourusername/yt-feed-carousel#readme",
+  "homepage": "https://github.com/lyndoncortez/yt-feed-widget#readme",
   "devDependencies": {
     "uglify-js": "^3.17.4",
-    "clean-css": "^5.3.2"
+    "clean-css-cli": "^5.6.2"
   },
-  "files": [
-    "dist/",
-    "src/",
-    "README.md",
-    "LICENSE"
-  ],
   "jsdelivr": "dist/yt-feed-carousel.min.js",
   "unpkg": "dist/yt-feed-carousel.min.js"
 }
