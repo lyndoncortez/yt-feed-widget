@@ -1,7 +1,7 @@
 # YT Feed Widget
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub release](https://img.shields.io/github/v/release/lyndoncortez/yt-feed-widgetl)](https://github.com/lyndoncortez/yt-feed-widget/releases)
+[![GitHub release](https://img.shields.io/github/v/release/lyndoncortez/yt-feed-widget)](https://github.com/lyndoncortez/yt-feed-widget/releases)
 [![CDN](https://img.shields.io/badge/CDN-jsDelivr-orange)](https://cdn.jsdelivr.net/gh/lyndoncortez/yt-feed-widget@latest/dist/yt-feed-all.min.js)
 
 **The fastest way to add YouTube feeds for A/B testing and CRO.** 🚀
