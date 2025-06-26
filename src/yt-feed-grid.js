@@ -94,7 +94,7 @@
 
         render() {
             this.container.innerHTML = '';
-            this.container.className = 'yt-feed-grid';
+            this.container.classList.add('yt-feed-grid');
 
             // Create grid container
             const gridContainer = document.createElement('div');
