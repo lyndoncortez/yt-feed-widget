@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const UglifyJS = require('uglify-js');
 const CleanCSS = require('clean-css');
+const sass = require('sass');
 
 console.log('🚀 Starting build process...\n');
 
@@ -62,6 +63,35 @@ jsFiles.forEach(file => {
     } catch (error) {
         console.error(`❌ Error processing ${file.src}:`, error.message);
         process.exit(1);
+    }
+});
+
+
+// Build SCSS files
+console.log('\n🎨 Compiling SCSS files...');
+const scssFiles = [
+    {
+        src: 'src/yt-feed-carousel.scss',
+        css: 'src/yt-feed-carousel.css'
+    },
+    {
+        src: 'src/yt-feed-grid.scss',
+        css: 'src/yt-feed-grid.css'
+    }
+];
+
+scssFiles.forEach(file => {
+    try {
+        const srcPath = path.join(__dirname, '..', file.src);
+        const cssPath = path.join(__dirname, '..', file.css);
+
+        if (fs.existsSync(srcPath)) {
+            const result = sass.compile(srcPath);
+            fs.writeFileSync(cssPath, result.css);
+            console.log(`   ✅ ${file.src} → ${file.css}`);
+        }
+    } catch (error) {
+        console.error(`❌ Error compiling ${file.src}:`, error.message);
     }
 });
 

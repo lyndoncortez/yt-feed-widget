@@ -50,5 +50,6 @@
     "clean-css-cli": "^5.6.2"
   },
   "jsdelivr": "dist/yt-feed-carousel.min.js",
-  "unpkg": "dist/yt-feed-carousel.min.js"
+  "unpkg": "dist/yt-feed-carousel.min.js",
+  "sass": "^1.69.5"
 }
