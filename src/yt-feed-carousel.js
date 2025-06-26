@@ -85,6 +85,7 @@
       const navButtons = this.createNavButtons();
 
       this.container.innerHTML = '';
+      this.container.classList.add('yt-feed-carousel');
       this.container.appendChild(track);
       this.container.appendChild(navButtons.prev);
       this.container.appendChild(navButtons.next);
