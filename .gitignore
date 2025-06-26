@@ -2,6 +2,7 @@
 node_modules/
 
 src/*.css
+test/config.js
 
 # Environment files
 .env

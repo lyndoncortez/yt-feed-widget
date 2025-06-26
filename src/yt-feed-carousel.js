@@ -18,7 +18,15 @@
       this.autoPlayInterval = config.autoPlayInterval || 5000;
       this.intervalId = null;
 
+      // Initialize analytics
+      this.analytics = config.analytics?.enabled ? new YTFeedAnalytics(config.analytics) : null;
+      this.videoPlayStartTime = null;
+      this.currentPlayingVideo = null;
+
       if (!this.apiKey || !this.playlistId) {
+        if (this.analytics) {
+          this.analytics.trackError('configuration_error', 'API key and playlist ID are required');
+        }
         throw new Error('API key and playlist ID are required');
       }
 
@@ -32,10 +40,25 @@
         this.bindEvents();
         this.updateItemsPerView();
 
+        if (this.analytics) {
+          this.analytics.trackWidgetLoad({
+            layout: 'carousel',
+            autoPlay: this.autoPlay,
+            autoPlayInterval: this.autoPlayInterval
+          }, this.videos.length);
+        }
+
         if (this.autoPlay) {
           this.startAutoPlay();
         }
       } catch (error) {
+        if (this.analytics) {
+          this.analytics.trackError('initialization_error', error.message, {
+            apiKey: !!this.apiKey,
+            playlistId: !!this.playlistId
+          });
+        }
+
         this.renderError('Failed to load videos. Please check your API key and playlist ID.');
         console.error('YouTube Carousel Error:', error);
       }
@@ -206,10 +229,16 @@
     next() {
       const maxIndex = this.videos.length - this.itemsPerView;
 
+      const oldIndex = this.currentIndex;
       if (this.currentIndex < maxIndex) {
-        this.currentIndex++; // Move by 1 video
+        this.currentIndex++;
       } else {
-        this.currentIndex = 0; // Loop back
+        this.currentIndex = 0;
+      }
+
+      // Track navigation
+      if(this.analytics) {
+        this.analytics.trackCarouselNavigation('next', this.currentIndex, this.videos.length);
       }
 
       this.updateCarouselPosition();
@@ -218,10 +247,16 @@
     prev() {
       const maxIndex = this.videos.length - this.itemsPerView;
 
+      const oldIndex = this.currentIndex;
       if (this.currentIndex > 0) {
-        this.currentIndex--; // Move by 1 video
+        this.currentIndex--;
       } else {
-        this.currentIndex = maxIndex; // Loop to end
+        this.currentIndex = maxIndex;
+      }
+
+      // Track navigation
+      if(this.analytics) {
+        this.analytics.trackCarouselNavigation('prev', this.currentIndex, this.videos.length);
       }
 
       this.updateCarouselPosition();
@@ -254,6 +289,19 @@
       const video = this.videos.find(v => v.id === videoId);
       if (!video) return;
 
+      // Find video position in carousel
+      const videoIndex = this.videos.findIndex(v => v.id === videoId);
+      const positionInCurrentView = videoIndex - this.currentIndex;
+
+      // Track video play
+      if(this.analytics) {
+        this.analytics.trackVideoPlay(video, videoIndex, 'carousel');
+      }
+
+      // Store play start time for duration tracking
+      this.videoPlayStartTime = Date.now();
+      this.currentPlayingVideo = video;
+
       this.createVideoLightbox(video);
     }
 
@@ -271,25 +319,25 @@
       const timeAgo = this.timeAgo(new Date(video.publishedAt));
 
       lightbox.innerHTML = `
-                <button class="lightbox-close">&times;</button>
-                <div class="lightbox-content">
-                    <iframe
-                        class="lightbox-video"
-                        src="https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen>
-                    </iframe>
-                    <div class="lightbox-info">
-                        <div class="lightbox-title">${video.title}</div>
-                        <div class="lightbox-stats">
-                            <span>${formattedViews} views</span>
-                            <span>${timeAgo}</span>
-                            <span>${duration}</span>
-                        </div>
-                    </div>
+        <div class="lightbox-content">
+            <button class="lightbox-close">&times;</button>
+            <iframe
+                class="lightbox-video"
+                src="https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>
+            <div class="lightbox-info">
+                <div class="lightbox-title">${video.title}</div>
+                <div class="lightbox-stats">
+                    <span>${formattedViews} views</span>
+                    <span>${timeAgo}</span>
+                    <span>${duration}</span>
                 </div>
-            `;
+            </div>
+        </div>
+    `;
 
       document.body.appendChild(lightbox);
 
@@ -318,6 +366,18 @@
     }
 
     closeLightbox(lightbox) {
+      // Track video close with watch time
+      if (this.videoPlayStartTime && this.currentPlayingVideo) {
+        const watchTime = Date.now() - this.videoPlayStartTime;
+
+        if(this.analytics) {
+          this.analytics.trackVideoClose(this.currentPlayingVideo, watchTime, 'carousel');
+        }
+
+        this.videoPlayStartTime = null;
+        this.currentPlayingVideo = null;
+      }
+
       lightbox.classList.remove('active');
 
       setTimeout(() => {
@@ -392,6 +452,10 @@
 
     refresh() {
       this.init();
+    }
+
+    getAnalytics() {
+      return this.analytics.getAnalyticsSummary();
     }
   }
 

@@ -10,13 +10,13 @@ Skip the development hassle. Copy, paste, and test video content impact on your 
 
 ## 🎨 Choose Your Layout
 
-### 🎠 Carousel Layout
+### Carousel
 Perfect for homepage heroes and featured content sections. [View Carousel Demo](https://lyndoncortez.github.io/yt-feed-widget/demo/)
 
-### 📊 Grid Layout
+### Grid
 Clean grid display ideal for portfolios and video galleries. [View Grid Demo](https://lyndoncortez.github.io/yt-feed-widget/demo/grid.html)
 
-### 🔄 Combined Package
+### Combined Package
 Use both layouts in the same project for maximum A/B testing flexibility.
 
 ## 🎯 Why Choose This Tool
@@ -280,10 +280,6 @@ Found a bug or need help? **[Open an issue](https://github.com/lyndoncortez/yt-f
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
-## 🙏 Thanks
-
-Built with ❤️ for content creators who want to showcase their YouTube videos beautifully.
-
 ---
 
-**[🚀 View Carousel Demo](https://lyndoncortez.github.io/yt-feed-widget/demo/)** | **[📊 View Grid Demo](https://lyndoncortez.github.io/yt-feed-widget/demo/grid.html)**
+**[View Carousel Demo](https://lyndoncortez.github.io/yt-feed-widget/demo/)** | **[View Grid Demo](https://lyndoncortez.github.io/yt-feed-widget/demo/grid.html)**
