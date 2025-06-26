@@ -3,7 +3,11 @@ const path = require('path');
 const UglifyJS = require('uglify-js');
 const CleanCSS = require('clean-css');
 
-console.log('🚀 Starting build process...\n');
+// Read version from package.json
+const packageJson = require('../package.json');
+const CURRENT_VERSION = packageJson.version;
+
+console.log(`🚀 Starting build process for v${CURRENT_VERSION}...\n`);
 
 // Ensure dist directory exists
 const distDir = path.join(__dirname, '..', 'dist');
@@ -12,7 +16,7 @@ if (!fs.existsSync(distDir)) {
     console.log('📁 Created dist/ directory');
 }
 
-// Build JavaScript files
+// Build JavaScript files with version replacement
 const jsFiles = [
     {
         src: 'src/yt-feed-carousel.js',
@@ -21,6 +25,10 @@ const jsFiles = [
     {
         src: 'src/yt-feed-grid.js',
         dist: 'dist/yt-feed-grid.min.js'
+    },
+    {
+        src: 'src/yt-feed-analytics.js',
+        dist: 'dist/yt-feed-analytics.min.js'
     }
 ];
 
@@ -31,7 +39,11 @@ jsFiles.forEach(file => {
         const distPath = path.join(__dirname, '..', file.dist);
 
         if (fs.existsSync(srcPath)) {
-            const source = fs.readFileSync(srcPath, 'utf8');
+            let source = fs.readFileSync(srcPath, 'utf8');
+
+            // Replace version placeholder with actual version from package.json
+            source = source.replace(/WIDGET_VERSION/g, CURRENT_VERSION);
+
             const minified = UglifyJS.minify(source, {
                 compress: {
                     drop_console: false,
@@ -55,7 +67,7 @@ jsFiles.forEach(file => {
             const minifiedSize = fs.statSync(distPath).size;
             const savings = ((originalSize - minifiedSize) / originalSize * 100).toFixed(1);
 
-            console.log(`   ✅ ${file.src} → ${file.dist} (${savings}% smaller)`);
+            console.log(`   ✅ ${file.src} → ${file.dist} (v${CURRENT_VERSION}, ${savings}% smaller)`);
         } else {
             console.log(`   ⚠️  ${file.src} not found, skipping...`);
         }
@@ -65,7 +77,7 @@ jsFiles.forEach(file => {
     }
 });
 
-// Build CSS files
+// Build CSS files (no version replacement needed)
 const cssFiles = [
     {
         src: 'src/yt-feed-carousel.css',
@@ -113,7 +125,7 @@ cssFiles.forEach(file => {
     }
 });
 
-// Create combined files
+// Create combined files with version replacement
 console.log('\n📦 Creating combined files...');
 
 try {
@@ -122,11 +134,13 @@ try {
         fs.readFileSync('dist/yt-feed-carousel.min.js', 'utf8') : '';
     const gridJS = fs.existsSync('dist/yt-feed-grid.min.js') ?
         fs.readFileSync('dist/yt-feed-grid.min.js', 'utf8') : '';
+    const analyticsJS = fs.existsSync('dist/yt-feed-analytics.min.js') ?
+        fs.readFileSync('dist/yt-feed-analytics.min.js', 'utf8') : '';
 
-    if (carouselJS || gridJS) {
-        const combinedJS = `${carouselJS}\n${gridJS}`;
+    if (carouselJS || gridJS || analyticsJS) {
+        const combinedJS = `${analyticsJS}\n${carouselJS}\n${gridJS}`;
         fs.writeFileSync('dist/yt-feed-all.min.js', combinedJS);
-        console.log('   ✅ Created yt-feed-all.min.js (carousel + grid)');
+        console.log(`   ✅ Created yt-feed-all.min.js (v${CURRENT_VERSION}) - includes analytics + carousel + grid`);
     }
 
     // Combined CSS
@@ -138,14 +152,16 @@ try {
     if (carouselCSS || gridCSS) {
         const combinedCSS = `${carouselCSS}\n${gridCSS}`;
         fs.writeFileSync('dist/yt-feed-all.min.css', combinedCSS);
-        console.log('   ✅ Created yt-feed-all.min.css (carousel + grid)');
+        console.log('   ✅ Created yt-feed-all.min.css (carousel + grid styles)');
     }
 } catch (error) {
     console.error('❌ Error creating combined files:', error.message);
 }
 
-console.log('\n🎉 Build complete! Files ready in dist/ directory');
+console.log(`\n🎉 Build complete for v${CURRENT_VERSION}! Files ready in dist/ directory`);
 console.log('\n📊 Available files:');
 console.log('   • yt-feed-carousel.min.js & .css (carousel only)');
 console.log('   • yt-feed-grid.min.js & .css (grid only)');
-console.log('   • yt-feed-all.min.js & .css (both layouts)');
+console.log('   • yt-feed-analytics.min.js (analytics engine only)');
+console.log('   • yt-feed-all.min.js & .css (everything combined)');
+console.log(`\n📋 All JavaScript files built with version: ${CURRENT_VERSION}`);

@@ -1,6 +1,6 @@
 {
   "name": "yt-feed-widget",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "YouTube feed tool for CRO and A/B testing",
   "main": "dist/yt-feed-carousel.min.js",
   "style": "dist/yt-feed-carousel.min.css",
