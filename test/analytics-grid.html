@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Built-in GA4 Analytics Test</title>
+    <link rel="stylesheet" href="../src/yt-feed-grid.css">
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+        .status {
+            background: #e3f2fd;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .event-log {
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            margin: 10px 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<h1>Built-in GA4 Analytics Test</h1>
+
+<div class="status">
+    <h3>Testing Our Built-in Analytics Engine</h3>
+    <p><strong>No manual GA4 tags needed!</strong> Our analytics engine will automatically:</p>
+    <ul>
+        <li>Load Google Analytics 4 script</li>
+        <li>Initialize gtag with your Measurement ID</li>
+        <li>Send widget events to your GA4 property</li>
+    </ul>
+</div>
+
+<div class="event-log" id="event-log">
+    <strong>Event Log:</strong><br>
+    <em>Analytics events will appear here...</em><br>
+</div>
+
+<button class="test-button" onclick="clearLog()">Clear Log</button>
+<button class="test-button" onclick="checkGA4Status()">Check GA4 Status</button>
+
+<h3>Test Widget</h3>
+<div id="test-grid"></div>
+
+<script src="config.js"></script>
+<script src="../src/yt-feed-analytics.js"></script>
+<script src="../src/yt-feed-grid.js"></script>
+<script>
+    // Replace with actual GA4 Measurement ID
+    const GA4_MEASUREMENT_ID = window.TEST_CONFIG.ga4MeasurementId;
+    const YOUTUBE_API_KEY = window.TEST_CONFIG.youtubeApiKey;
+
+    // Log events to page
+    function logEvent(message, type = 'info') {
+        const log = document.getElementById('event-log');
+        const colors = { info: '#2196F3', success: '#4CAF50', error: '#f44336', warning: '#ff9800' };
+        log.innerHTML += `<div style="margin: 5px 0; color: ${colors[type]};">${new Date().toLocaleTimeString()}: ${message}</div>`;
+        log.scrollTop = log.scrollHeight;
+    }
+
+    // Check if GA4 loaded
+    function checkGA4Status() {
+        if (window.gtag) {
+            logEvent('GA4 (gtag) is loaded and ready!', 'success');
+            logEvent(`Measurement ID: ${GA4_MEASUREMENT_ID}`, 'info');
+        } else {
+            logEvent('GA4 (gtag) not detected', 'error');
+        }
+    }
+
+    function clearLog() {
+        document.getElementById('event-log').innerHTML = '<strong>Event Log:</strong><br>';
+    }
+
+    // Initialize widget with built-in analytics
+    try {
+        logEvent('Initializing widget with built-in GA4 analytics...', 'info');
+
+        const widget = new YTFeedGrid('test-grid', {
+            apiKey: YOUTUBE_API_KEY,
+            playlistId: 'PLTMCOpwUx_8_JDB658DiNh64bc9MD7q8e',
+            gridColumns: 3,
+            gridRows: 2,
+            showLoadMore: true,
+            showSubscribe: true,
+            analytics: {
+                enabled: true,
+                provider: 'ga4',
+                measurementId: GA4_MEASUREMENT_ID,
+                debug: true,
+                customEvents: true // Also enable custom events for logging
+            }
+        });
+
+        logEvent('Widget initialized successfully!', 'success');
+
+        // Wait a moment then check if GA4 loaded
+        setTimeout(() => {
+            checkGA4Status();
+        }, 2000);
+
+    } catch (error) {
+        logEvent(`Widget initialization error: ${error.message}`, 'error');
+    }
+
+    // Listen for custom analytics events
+    document.addEventListener('yt_feed_analytics', function(event) {
+        const { eventName, eventData } = event.detail;
+        logEvent(`${eventName}: ${eventData.video_title || eventData.layout_type || 'N/A'}`, 'success');
+    });
+
+    // Instructions
+    logEvent('Instructions: 1) Add your GA4 Measurement ID above', 'warning');
+    logEvent('Instructions: 2) Add your YouTube API key above', 'warning');
+    logEvent('Instructions: 3) Save and refresh page', 'warning');
+    logEvent('Instructions: 4) Check GA4 Realtime reports for events!', 'warning');
+</script>
+</body>
+</html>

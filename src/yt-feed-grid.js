@@ -21,7 +21,13 @@
             this.displayedCount = this.gridColumns * this.gridRows;
             this.currentOffset = 0;
 
+            // Initialize analytics
+            this.analytics = config.analytics?.enabled ? new YTFeedAnalytics(config.analytics) : null;
+            this.videoPlayStartTime = null;
+            this.currentPlayingVideo = null;
+
             if (!this.apiKey || !this.playlistId) {
+                this.analytics.trackError('configuration_error', 'API key and playlist ID are required');
                 throw new Error('API key and playlist ID are required');
             }
 
@@ -34,7 +40,26 @@
                 await this.loadChannelInfo();
                 this.render();
                 this.bindEvents();
+
+                // Track successful widget load
+                if (this.analytics) {
+                    this.analytics.trackWidgetLoad({
+                        layout: 'grid',
+                        gridColumns: this.gridColumns,
+                        gridRows: this.gridRows,
+                        showLoadMore: this.showLoadMore,
+                        showSubscribe: this.showSubscribe
+                    }, this.videos.length);
+                }
+
             } catch (error) {
+                if (this.analytics) {
+                    this.analytics.trackError('initialization_error', error.message, {
+                        apiKey: !!this.apiKey,
+                        playlistId: !!this.playlistId
+                    });
+                }
+
                 this.renderError('Failed to load videos. Please check your API key and playlist ID.');
                 console.error('YT Feed Grid Error:', error);
             }
@@ -183,6 +208,13 @@
         }
 
         loadMore() {
+            const previousCount = this.currentOffset + this.displayedCount;
+
+            // Track load more click
+            if (this.analytics) {
+                this.analytics.trackLoadMore(previousCount, this.videos.length, 'grid');
+            }
+
             this.currentOffset += this.displayedCount;
             const gridContainer = this.container.querySelector('.yt-grid-container');
             this.renderVideos(gridContainer);
@@ -200,6 +232,14 @@
 
         subscribe() {
             if (this.channelId) {
+                // Track subscribe click
+                if (this.analytics) {
+                    this.analytics.trackSubscribeClick({
+                        channelId: this.channelId,
+                        channelTitle: this.channelInfo?.snippet?.title || 'Unknown'
+                    }, 'grid');
+                }
+
                 window.open(`https://www.youtube.com/channel/${this.channelId}?sub_confirmation=1`, '_blank');
             }
         }
@@ -241,6 +281,18 @@
             const video = this.videos.find(v => v.id === videoId);
             if (!video) return;
 
+            // Find video position in grid
+            const videoIndex = this.videos.findIndex(v => v.id === videoId);
+
+            // Track video play
+            if (this.analytics) {
+                this.analytics.trackVideoPlay(video, videoIndex, 'grid');
+            }
+
+            // Store play start time for duration tracking
+            this.videoPlayStartTime = Date.now();
+            this.currentPlayingVideo = video;
+
             this.createVideoLightbox(video);
         }
 
@@ -259,23 +311,22 @@
             lightbox.innerHTML = `
                 <div class="yt-lightbox-content">
                     <button class="yt-lightbox-close">&times;</button>
-                    <iframe
-                        class="yt-lightbox-video"
-                        src="https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen>
-                    </iframe>
+                        <iframe
+                          class="yt-lightbox-video"
+                          src="https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0"
+                          frameborder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowfullscreen>
+                        </iframe>
                     <div class="yt-lightbox-info">
-                        <div class="yt-lightbox-title">${video.title}</div>
-                        <div class="yt-lightbox-stats">
-                            <span>${video.channelTitle}</span>
-                            <span>${formattedViews} views</span>
-                            <span>${timeAgo}</span>
-                        </div>
+                      <div class="yt-lightbox-title">${video.title}</div>
+                      <div class="yt-lightbox-stats">
+                          <span>${video.channelTitle}</span>
+                          <span>${formattedViews} views</span>
+                          <span>${timeAgo}</span>
+                      </div>
                     </div>
-                </div>
-            `;
+                </div>`;
 
             document.body.appendChild(lightbox);
 
@@ -304,6 +355,18 @@
         }
 
         closeLightbox(lightbox) {
+            // Track video close with watch time
+            if (this.videoPlayStartTime && this.currentPlayingVideo) {
+                const watchTime = Date.now() - this.videoPlayStartTime;
+
+                if (this.analytics) {
+                    this.analytics.trackVideoClose(this.currentPlayingVideo, watchTime, 'grid');
+                }
+
+                this.videoPlayStartTime = null;
+                this.currentPlayingVideo = null;
+            }
+
             lightbox.classList.remove('active');
 
             setTimeout(() => {
@@ -346,6 +409,10 @@
         refresh() {
             this.currentOffset = 0;
             this.init();
+        }
+
+        getAnalytics() {
+            return this.analytics.getAnalyticsSummary();
         }
     }
 

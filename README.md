@@ -247,6 +247,9 @@ Both layouts support easy theming with CSS custom properties:
 }
 ```
 
+## 📊 Optional: Analytics Tracking
+Want to track video performance? **[Enable Analytics →](docs/ANALYTICS.md)**
+
 ## ✨ What You Get
 
 - 📱 **Mobile-first responsive design** - Perfect on all devices

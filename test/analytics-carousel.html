@@ -62,7 +62,7 @@
 <script src="../src/yt-feed-analytics.js"></script>
 <script src="../src/yt-feed-carousel.js"></script>
 <script>
-    // Replace with your actual GA4 Measurement ID
+    // Replace with actual GA4 Measurement ID
     const GA4_MEASUREMENT_ID = window.TEST_CONFIG.ga4MeasurementId;
     const YOUTUBE_API_KEY = window.TEST_CONFIG.youtubeApiKey;
 
@@ -93,12 +93,12 @@
         logEvent('Initializing widget with built-in GA4 analytics...', 'info');
 
         const widget = new YTFeedCarousel('test-carousel', {
-            apiKey: window.TEST_CONFIG.youtubeApiKey,
+            apiKey: YOUTUBE_API_KEY,
             playlistId: 'PLTMCOpwUx_8_JDB658DiNh64bc9MD7q8e',
             analytics: {
                 enabled: true,
                 provider: 'ga4',
-                measurementId: window.TEST_CONFIG.ga4MeasurementId,
+                measurementId: GA4_MEASUREMENT_ID,
                 debug: true,
                 customEvents: true // Also enable custom events for logging
             }
@@ -118,7 +118,7 @@
     // Listen for custom analytics events
     document.addEventListener('yt_feed_analytics', function(event) {
         const { eventName, eventData } = event.detail;
-        logEvent(`📈 ${eventName}: ${eventData.video_title || eventData.layout_type || 'N/A'}`, 'success');
+        logEvent(`${eventName}: ${eventData.video_title || eventData.layout_type || 'N/A'}`, 'success');
     });
 
     // Instructions
